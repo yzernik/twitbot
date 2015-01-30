@@ -28,12 +28,6 @@
     })
   )
 
-; simply retrieves the user, authenticating with the above credentials
-(defn test-twitter
-  [username]
-  (users-show :oauth-creds my-creds :params {:screen-name username})
-  )
-
 (defn parse-date
   [date]
   (.parse (new java.text.SimpleDateFormat "EEE MMM dd HH:mm:ss Z yyyy" java.util.Locale/ENGLISH) date))
