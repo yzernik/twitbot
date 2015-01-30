@@ -20,8 +20,6 @@
     )
 )
 
-(def all-topics (map #(name %) (keys messages)))
-
 (defn -main
   "RMS bot main function."
   [& args]
@@ -36,8 +34,8 @@
         (println "\n" (str "[" topic " " lang " " tweet-id "]") ":" message "\n ==>" to-tweet-text)
         (twitter/tweet to-tweet-text tweet-id)))
 
-  (doseq [topic all-topics]
-    (let [ t (get messages (keyword (pp topic))) ]
+  (doseq [topic (keys messages)]
+    (let [ t (get messages (pp topic)) ]
       (twitter/stream
         (:keywords t)
         (:exclude t)
