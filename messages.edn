@@ -3,10 +3,11 @@
     :keywords ["linux"],
     :exclude ["gnu" "kernel"],
     :messages {
-      :en ["BTW, it's called GNU/Linux" "Linux is only the kernel..."]
-      :fr ["Il faut dire GNU/Linux" "Ca s'appelle GNU/Linux"]
+      :en ["BTW, it's called GNU/Linux" "Linux is only the kernel, the OS is GNU/Linux"]
+      :fr ["Il faut dire GNU/Linux" "Ca s'appelle GNU/Linux" "Linux n'est que le noyau... C'est GNU/Linux l'OS"]
       :ja ["GNU/Linuxだよ！" "正しくは「GNU/Linux」だよ"]
       :de ["Sie müssen GNU/Linux sagen!"]
+      :ar [" يجب ان تقول GNU/Linux‎" "لا انه GNU / LINUX"]
     }
   },
   {
@@ -26,6 +27,10 @@
       ],
       :ja [
         "オープンソースは自由ソフトウェアの的を外すよ https://www.gnu.org/philosophy/open-source-misses-the-point.ja.html"
+      ]
+      :ar [
+        "المصادر المفتوحة لا تفي بغرض البرمجيات الحرة"
+        "المصادر المفتوحة لم تفهم غرض البرمجيات الحرة"‎
       ]
     }
   }
