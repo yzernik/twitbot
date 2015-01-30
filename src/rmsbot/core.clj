@@ -30,12 +30,6 @@
   ; this can come in a second priority feature
 )
 
-(defn detect-language
-  "Determine the language of a tweet"
-  [tweet-text]
-  (detectlang/identify tweet-text)
-)
-
 (defn pick-answer
   "Pick an answer for a given topic and language. The topic comes from messages.edn."
   [topic lang]
@@ -52,7 +46,7 @@
   "Return the text to answer to a message, or nil if no match. Example: 'I love linux' => 'BTW it's GNU/Linux'"
   [message]
   (let [
-    lang (detect-language message)
+    lang (detectlang/identify message)
     topic (tweet-topic message)]
     ((fnil #(pick-answer % lang) nil) topic))
 )
