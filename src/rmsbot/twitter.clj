@@ -20,6 +20,15 @@
                 (:twitter-accesstoken-secret config)
                 ))
 
+(defn tweet
+  [message parent-id]
+  (statuses-update :oauth-creds my-creds
+    :params {
+      :status message,
+      :in_reply_to_status_id parent-id
+    })
+  )
+
 ; simply retrieves the user, authenticating with the above credentials
 (defn test-twitter
   [username]

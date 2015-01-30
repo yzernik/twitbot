@@ -54,15 +54,6 @@
     )
 )
 
-(defn tweet
-  "Tweet an answer to a given tweet (referenced by id) – or just tweet something when tweet-parent-id is nil"
-  [tweet-text tweet-parent-id]
-
-  (println "tweeting..." tweet-text)
-  ; TODO obviously use the twitter API
-  true
-)
-
 (defn -main
   "RMS bot main function."
   [& args]
@@ -76,7 +67,7 @@
         [tweet-id tweet-text topic] ["42424242424242" "I love linux" "linux"] ; mock data
         lang (detect-language tweet-text)
         to-tweet-text (pick-answer topic lang)]
-    (tweet to-tweet-text tweet-id))
+    (rmsbot.twitter/tweet to-tweet-text tweet-id))
   ; should this by try catched in the main loop? :-D
 )
 
