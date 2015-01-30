@@ -40,11 +40,10 @@
 (defn start-stream [stream]
   (client/start-twitter-stream stream))
 
-(def my-pool (mk-pool))
-
 (defn stream [keywords exclude callback refresh-rate delay-ms]
   (let [stream (create-stream (first keywords)); TODO (clojure.string/join " OR " keywords))
-        _ (start-stream stream)]
+        _ (start-stream stream)
+        my-pool (mk-pool) ]
 
     (after delay-ms
       (fn[] (every refresh-rate (fn[]
