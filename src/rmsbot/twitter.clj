@@ -12,8 +12,6 @@
   (:import
     (twitter.callbacks.protocols SyncSingleCallback)))
 
-(require 'clojure.edn)
-
 (def my-creds (make-oauth-creds (:twitter-key config)
                 (:twitter-secret config)
                 (:twitter-accesstoken config)
