@@ -1,5 +1,5 @@
-[
-  {
+{
+  :linux {
     :keywords ["linux"],
     :exclude ["gnu" "kernel"],
     :messages {
@@ -10,7 +10,7 @@
       :ar [" يجب ان تقول GNU/Linux‎" "لا انه GNU / LINUX"]
     }
   },
-  {
+  :opensource {
     :keywords ["open source" "opensource"],
     :exclude ["free software"],
     :messages {
@@ -34,4 +34,4 @@
       ]
     }
   }
-]
+}

@@ -31,25 +31,28 @@
 )
 
 (defn pick-answer
-  "Pick an answer for a given topic and language. The topic comes from messages.edn."
+  "Pick an answer for a given topic and language. Ex: 'linux' 'fr'"
   [topic lang]
-  (rand-nth (get (:messages topic) (keyword lang) (:en (:messages topic))))
-)
-
-(defn tweet-topic
-  "Find a matching topic for the input tweet message, nil if no match"
-  [message]
-  (first (filter (fn [m] (some #(.contains message %) (:keywords m))) messages))
-)
-
-(defn tweet-answer
-  "Return the text to answer to a message, or nil if no match. Example: 'I love linux' => 'BTW it's GNU/Linux'"
-  [message]
   (let [
-    lang (detectlang/identify message)
-    topic (tweet-topic message)]
-    ((fnil #(pick-answer % lang) nil) topic))
+    topic-data (get messages (keyword topic))]
+    (rand-nth (get (:messages topic-data) (keyword lang) (:en (:messages topic-data))))
+    )
 )
+
+;(defn tweet-topic
+;  "Find a matching topic for the input tweet message, nil if no match"
+;  [message]
+;  (first (filter (fn [m] (some #(.contains message %) (:keywords m))) messages))
+;)
+
+;(defn tweet-answer
+;  "Return the text to answer to a message, or nil if no match. Example: 'I love linux' => 'BTW it's GNU/Linux'"
+;  [message]
+;  (let [
+;    lang (detectlang/identify message)
+;    topic (tweet-topic message)]
+;    ((fnil #(pick-answer % lang) nil) topic))
+;)
 
 (defn -main
   "RMS bot main function."
