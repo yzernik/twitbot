@@ -12,6 +12,10 @@
 
 ; Have fun !
 
+(require 'clojure.edn)
+
+(def messages (clojure.edn/read-string (slurp "messages.edn")))
+
 (defn tweets-channel
   "Create a channel of tweets"
   []
@@ -31,12 +35,23 @@
   (detectlang/identify tweet-text)
 )
 
+(defn find-answer
+  [topic]
+  (first (filter (fn [m] true) messages))
+  ; (first (filter (fn [m] (contains? (:keywords m) topic)) messages))
+  )
+
 (defn pick-answer
   "Pick an answer for a given topic and language. For instance, 'linux' and 'fr' might be: 'Vous devez dire GNU/Linux.'"
   [topic lang]
-  ; TODO a tuple of [topic lang] can have multiple variants. We can randomly pick one.
-  ; TODO Ideally we should use the Google Spreadsheet, retrieve the sheet of the topic, the language column, and then randomly pick one row
-  "This is GNU/Linux, not Linux!"
+;  (println "messages: " (some #(= "toto" %) (:keywords (find-answer "linux"))))
+  ; TODO Switch to Google Spreadsheet for easier edition?
+  (let [answer (first (filter (fn [m] (some #(= topic %) (:keywords m))) messages))]
+    (if answer
+      (rand-nth (get (:messages answer) (keyword lang) (:en (:messages answer))))
+      nil
+      )
+    )
 )
 
 (defn tweet
@@ -56,7 +71,6 @@
   ; See also http://clojuredocs.org/clojure.core.async/go-loop
 
   ; then for each tweet apply following:
-  (println (rmsbot.twitter/test-twitter "erwan"))
 
   (let [
         [tweet-id tweet-text topic] ["42424242424242" "I love linux" "linux"] ; mock data
