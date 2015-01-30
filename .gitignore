@@ -1,4 +1,9 @@
-.idea/
+# Project specific
+
+config.edn
+
+# Lein&Closure
+
 /target
 /classes
 /checkouts
@@ -8,5 +13,12 @@ pom.xml.asc
 *.class
 /.lein-*
 /.nrepl-port
+
+# IDE and editors
+
+.idea/
+
+# Various stuff
+
 .hgignore
 .hg/
