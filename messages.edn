@@ -31,11 +31,20 @@
         "オープンソースは自由ソフトウェアの的を外すよ https://www.gnu.org/philosophy/open-source-misses-the-point.ja.html"
       ]
       :ar [
-        "المصادر المفتوحة لا تفي بغرض البرمجيات الحرة"
-        "المصادر المفتوحة لم تفهم غرض البرمجيات الحرة"‎
+                                  "المصادر المفتوحة لا تفي بغرض البرمجيات الحرة"
+                                  "المصادر المفتوحة لم تفهم غرض البرمجيات الحرة" ‎
       ]
       :ru ["Свободное программное обеспечение лучше. http://www.fsf.org/"]
       :cn ["自由软件是最好的。 https://zh.wikipedia.org/wiki/%E8%87%AA%E7%94%B1%E8%BD%AF%E4%BB%B6"]
+    }
+  },
+  :facebook {
+    :keywords ["facebook", "zuckerberg", "markzuckerberg"],
+    :exclude [],
+    :messages {
+      :en [
+        "Facebook is mass surveillance https://stallman.org/facebook.html"
+      ]
     }
   }
 }
