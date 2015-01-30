@@ -35,7 +35,8 @@
           screen-name (-> original-tweet :user :screen_name)
           to-tweet-text (str "@" screen-name " " answer) ]
       (println "\n" (str "[" topic " " lang " " tweet-id "]") ":" message "\n ==>" to-tweet-text)
-      (twitter/follow screen-name)
+      (if (:follow-on-tweet config)
+        (twitter/follow screen-name))
       (twitter/tweet to-tweet-text tweet-id)))
 
 (defn -main
