@@ -9,10 +9,11 @@
       :de ["Sie müssen GNU/Linux sagen!"]
       :ar [" يجب ان تقول GNU/Linux‎" "لا انه GNU / LINUX"]
       :ru ["Кстати, это называется GNU / Linux"]
+      :cn ["你应该说GNU/ Linux。"]
     }
   },
   :opensource {
-    :keywords ["open source" "opensource"],
+    :keywords ["opensource"],
     :exclude ["free software"],
     :messages {
       :en [
@@ -34,6 +35,7 @@
         "المصادر المفتوحة لم تفهم غرض البرمجيات الحرة"‎
       ]
       :ru ["Свободное программное обеспечение лучше. http://www.fsf.org/"]
+      :cn ["自由软件是最好的。 https://zh.wikipedia.org/wiki/%E8%87%AA%E7%94%B1%E8%BD%AF%E4%BB%B6"]
     }
   }
 }

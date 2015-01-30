@@ -75,10 +75,12 @@
 
 (def my-pool (mk-pool))
 
-(defn stream [term callback]
-  (let [stream (create-stream term)
+(defn stream [keywords exclude callback]
+  (let [stream (create-stream (clojure.string/join " OR " keywords))
         _ (start-stream stream)]
 
     (every 1000 (fn[](let [q (client/retrieve-queues stream)
                            tweets (:tweet q)]
-                       (doseq [t tweets] (callback t)))) my-pool)))
+                       (doseq [t tweets]
+                         (if (every? #(not (.contains (:text t) %)) exclude) (callback t))
+                         ))) my-pool)))
