@@ -1,5 +1,6 @@
 (ns rmsbot.twitter
   (:use
+    [rmsbot.config]
     [twitter.oauth]
     [twitter.callbacks]
     [twitter.callbacks.handlers]
@@ -12,8 +13,6 @@
     (twitter.callbacks.protocols SyncSingleCallback)))
 
 (require 'clojure.edn)
-
-(def config (clojure.edn/read-string (slurp "config.edn")))
 
 (def my-creds (make-oauth-creds (:twitter-key config)
                 (:twitter-secret config)

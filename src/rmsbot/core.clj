@@ -1,7 +1,7 @@
 (ns rmsbot.core
   (:gen-class)
-  (use [rmsbot.twitter])
-  )
+  (:require [rmsbot.detectlang :as detectlang])
+  (use [rmsbot.twitter]))
 
 ; Hi guys :-)
 
@@ -28,8 +28,7 @@
 (defn detect-language
   "Determine the language of a tweet"
   [tweet-text]
-  ; Use https://detectlanguage.com/ for this
-  "en"
+  (detectlang/identify tweet-text)
 )
 
 (defn pick-answer
