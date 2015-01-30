@@ -1,7 +1,8 @@
 (ns rmsbot.core
   (:gen-class)
-  (:require [rmsbot.detectlang :as detectlang])
-  (use [rmsbot.twitter]))
+  (:require
+    [rmsbot.detectlang :as detectlang]
+    [rmsbot.twitter :as twitter]))
 
 ; Hi guys :-)
 
@@ -36,15 +37,24 @@
 )
 
 (defn pick-answer
-  "Pick an answer for a given topic and language. For instance, 'linux' and 'fr' might be: 'Vous devez dire GNU/Linux.'"
+  "Pick an answer for a given topic and language. The topic comes from messages.edn."
   [topic lang]
-  ; TODO Switch to Google Spreadsheet for easier edition?
-  (let [answer (first (filter (fn [m] (some #(= topic %) (:keywords m))) messages))]
-    (if answer
-      (rand-nth (get (:messages answer) (keyword lang) (:en (:messages answer))))
-      nil
-      )
-    )
+  (rand-nth (get (:messages topic) (keyword lang) (:en (:messages topic))))
+)
+
+(defn tweet-topic
+  "Find a matching topic for the input tweet message, nil if no match"
+  [message]
+  (first (filter (fn [m] (some #(.contains message %) (:keywords m))) messages))
+)
+
+(defn tweet-answer
+  "Return the text to answer to a message, or nil if no match. Example: 'I love linux' => 'BTW it's GNU/Linux'"
+  [message]
+  (let [
+    lang (detect-language message)
+    topic (tweet-topic message)]
+    ((fnil #(pick-answer % lang) nil) topic))
 )
 
 (defn -main
@@ -57,10 +67,12 @@
   ; then for each tweet apply following:
 
   (let [
-        [tweet-id tweet-text topic] ["42424242424242" "I love linux" "linux"] ; mock data
-        lang (detect-language tweet-text)
-        to-tweet-text (pick-answer topic lang)]
-    (rmsbot.twitter/tweet to-tweet-text tweet-id))
+        [tweet-id tweet-text] ["42424242424242" "I love linux"] ; mock data
+        to-tweet-text (tweet-answer tweet-text)]
+    (if to-tweet-text
+      (twitter/tweet to-tweet-text tweet-id)
+      ())
+    )
   ; should this by try catched in the main loop? :-D
 )
 
