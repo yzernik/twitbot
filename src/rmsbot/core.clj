@@ -26,8 +26,6 @@
   ; this can come in a second priority feature
 )
 
-(def config (clojure.edn/read-string (slurp "config.edn")))
-
 (defn detect-language
   "Determine the language of a tweet"
   [tweet-text]
@@ -47,7 +45,6 @@
   "Tweet an answer to a given tweet (referenced by id) – or just tweet something when tweet-parent-id is nil"
   [tweet-text tweet-parent-id]
 
-  (println "twitter-key " (:twitter-key config))
   (println "tweeting..." tweet-text)
   ; TODO obviously use the twitter API
   true
