@@ -1,0 +1,21 @@
+[
+  {
+    :keywords ["linux"],
+    :exclude ["gnu" "kernel"],
+    :messages {
+      :en ["BTW, it's called GNU/Linux" "Linux is only the kernel..."]
+      :fr ["Il faut dire GNU/Linux" "Ca s'appelle GNU/Linux"]
+      :ja ["GNU/Linuxだよ！" "正しくは「GNU/Linux」だよ"]
+    }
+  },
+  {
+    :keywords ["open source" "opensource"],
+    :exclude ["free software"],
+    :messages {
+      :en [
+        "Free Software is better. http://www.fsf.org/"
+        "Open Source misses the point! https://www.gnu.org/philosophy/open-source-misses-the-point.html"
+      ]
+    }
+  }
+]
