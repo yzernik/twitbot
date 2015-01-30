@@ -1,5 +1,7 @@
 (ns rmsbot.core
-  (:gen-class))
+  (:gen-class)
+  (use [rmsbot.twitter])
+  )
 
 ; Hi guys :-)
 
@@ -9,9 +11,6 @@
 ; or if you miss inspiration for HTTP usage: https://github.com/ornicar/vindinium-starter-clojure/blob/master/src/vindinium/core.clj
 
 ; Have fun !
-
-(require 'clojure.edn)
-
 
 (defn tweets-channel
   "Create a channel of tweets"
@@ -58,6 +57,7 @@
   ; See also http://clojuredocs.org/clojure.core.async/go-loop
 
   ; then for each tweet apply following:
+  (println (rmsbot.twitter/test-twitter "erwan"))
 
   (let [
         [tweet-id tweet-text topic] ["42424242424242" "I love linux" "linux"] ; mock data

@@ -3,9 +3,15 @@
     [twitter.oauth]
     [twitter.callbacks]
     [twitter.callbacks.handlers]
+    [twitter.api.streaming]
     [twitter.api.restful])
+  (:require
+    [clojure.data.json :as json]
+    [http.async.client :as ac])
   (:import
     (twitter.callbacks.protocols SyncSingleCallback)))
+
+(require 'clojure.edn)
 
 (def config (clojure.edn/read-string (slurp "config.edn")))
 
