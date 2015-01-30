@@ -61,7 +61,7 @@
             lang (detectlang/identify message)
             answer (pick-answer topic lang)
             to-tweet-text (str "@" (-> original-tweet :user :screen_name) " " answer) ]
-        (println "\n" (str "[" topic "*" lang "$" tweet-id "]") ":" lang message "\n ==>" to-tweet-text))))
+        (println "\n" (str "[" topic "*" lang "$" tweet-id "]") ":" message "\n ==>" to-tweet-text))))
       ;(twitter/tweet to-tweet-text tweet-id))))
 
   (twitter/stream-by-search
