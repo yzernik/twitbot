@@ -26,23 +26,22 @@
   "RMS bot main function."
   [& args]
 
-  (defn throttle-tweet [topic original-tweet]
-    (if (< (rand) 0.5)
+  (defn tweet [topic original-tweet]
       (let [
             message (:text original-tweet)
             tweet-id (:id original-tweet)
             lang (detectlang/identify message)
             answer (pick-answer topic lang)
             to-tweet-text (str "@" (-> original-tweet :user :screen_name) " " answer) ]
-        (println "\n" (str "[" topic " " lang " " tweet-id "]") ":" message "\n ==>" to-tweet-text))))
-      ;(twitter/tweet to-tweet-text tweet-id))))
+        (println "\n" (str "[" topic " " lang " " tweet-id "]") ":" message "\n ==>" to-tweet-text)
+        (twitter/tweet to-tweet-text tweet-id)))
 
   (doseq [topic all-topics]
     (let [ t (get messages (keyword (pp topic))) ]
       (twitter/stream
         (:keywords t)
         (:exclude t)
-        #(throttle-tweet topic %))))
+        #(tweet topic %))))
 )
 
 
@@ -63,4 +62,3 @@
 ;  You should have received a copy of the AFFERO GNU General Public License
 ;  along with rmsbot.  If not, see <http://www.gnu.org/licenses/agpl-3.0.html>
 ;
-    (if (< (rand) 1)

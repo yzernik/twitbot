@@ -82,5 +82,8 @@
     (every 1000 (fn[](let [q (client/retrieve-queues stream)
                            tweets (:tweet q)]
                        (doseq [t tweets]
-                         (if (every? #(not (.contains (:text t) %)) exclude) (callback t))
+                         (if (and
+                               (not (= (-> t :user :screen_name) "rmsthebot"))
+                               (every? #(not (.contains (.toLowerCase (:text t)) (.toLowerCase %))) exclude))
+                           (callback t))
                          ))) my-pool)))
