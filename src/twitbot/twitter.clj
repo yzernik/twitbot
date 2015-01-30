@@ -30,6 +30,10 @@
       :in_reply_to_status_id parent-id
     }))
 
+
+(def follow [screen-name]
+  (friendships-create :oauth-creds my-creds :params { :screen_name screen-name }))
+
 (defn create-stream [term]
   (client/create-twitter-stream twitter.api.streaming/statuses-filter :oauth-creds my-creds :params {:track term}))
 
@@ -39,14 +43,14 @@
 (def my-pool (mk-pool))
 
 (defn stream [keywords exclude callback refresh-rate delay-ms]
-  (let [stream (create-stream (clojure.string/join " OR " keywords))
+  (let [stream (create-stream (first keywords)); TODO (clojure.string/join " OR " keywords))
         _ (start-stream stream)]
 
     (after delay-ms
       (fn[] (every refresh-rate (fn[]
                          (let [q (client/retrieve-queues stream)
                                tweets (:tweet q)
-                               _ (println (str (count tweets) " tweets the last " refresh-rate " ms.\n"))]
+                               _ (println keywords (str (count tweets) " tweets the last " refresh-rate " ms.\n"))]
                        (let [t (first tweets)]
                          (if (and
                                (not (= (-> t :user :screen_name) (:twitter-screen-name config)))

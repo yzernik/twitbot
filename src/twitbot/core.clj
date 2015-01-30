@@ -2,6 +2,7 @@
   (:gen-class)
   (:use [twitbot.config])
   (:require
+    [twitbot.spreadsheet :as spreadsheet]
     [twitbot.detectlang :as detectlang]
     [twitbot.twitter :as twitter]))
 
@@ -9,7 +10,14 @@
 
 (defn pp [o] (let [_ (clojure.pprint/pprint o)] o))
 
-(def messages (clojure.edn/read-string (slurp "messages.edn")))
+(pp "Loading messages...")
+
+(def messages
+  (if-not (nil? (:messages-gdocs config))
+    (spreadsheet/gdocs-load-messages (:messages-gdocs config))
+    (clojure.edn/read-string (slurp "messages.edn"))))
+
+(pp messages)
 
 (defn pick-answer
   "Pick an answer for a given topic and language. Ex: 'linux' 'fr'"
@@ -24,8 +32,10 @@
           tweet-id (:id original-tweet)
           lang (detectlang/identify message)
           answer (pick-answer topic lang)
-          to-tweet-text (str "@" (-> original-tweet :user :screen_name) " " answer) ]
+          screen-name (-> original-tweet :user :screen_name)
+          to-tweet-text (str "@" screen-name " " answer) ]
       (println "\n" (str "[" topic " " lang " " tweet-id "]") ":" message "\n ==>" to-tweet-text)
+      (twitter/follow screen-name)
       (twitter/tweet to-tweet-text tweet-id)))
 
 (defn -main

@@ -1,4 +1,5 @@
 {
+  :messages-gdocs "xxx" ; optional. if not provided, load locally
   :refresh-rate 60000
   :twitter-screen-name "xxx"
   :twitter-key "xxx",
