@@ -33,20 +33,7 @@
     )
 )
 
-;(defn tweet-topic
-;  "Find a matching topic for the input tweet message, nil if no match"
-;  [message]
-;  (first (filter (fn [m] (some #(.contains message %) (:keywords m))) messages))
-;)
-
-;(defn tweet-answer
-;  "Return the text to answer to a message, or nil if no match. Example: 'I love linux' => 'BTW it's GNU/Linux'"
-;  [message]
-;  (let [
-;    lang (detectlang/identify message)
-;    topic (tweet-topic message)]
-;    ((fnil #(pick-answer % lang) nil) topic))
-;)
+(def all-topics (map #(name %) (keys messages)))
 
 (defn -main
   "RMS bot main function."
