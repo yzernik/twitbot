@@ -35,16 +35,9 @@
   (detectlang/identify tweet-text)
 )
 
-(defn find-answer
-  [topic]
-  (first (filter (fn [m] true) messages))
-  ; (first (filter (fn [m] (contains? (:keywords m) topic)) messages))
-  )
-
 (defn pick-answer
   "Pick an answer for a given topic and language. For instance, 'linux' and 'fr' might be: 'Vous devez dire GNU/Linux.'"
   [topic lang]
-;  (println "messages: " (some #(= "toto" %) (:keywords (find-answer "linux"))))
   ; TODO Switch to Google Spreadsheet for easier edition?
   (let [answer (first (filter (fn [m] (some #(= topic %) (:keywords m))) messages))]
     (if answer
