@@ -1,18 +1,13 @@
 (ns rmsbot.core
   (:gen-class)
-  (:require [rmsbot.detectlang :as detectlang])
-  (use [rmsbot.twitter]))
-
-; Hi guys :-)
-
-; Let's try some Clojure today =)
-
-; The clojure documentation can be found on: http://clojure.org/
-; or if you miss inspiration for HTTP usage: https://github.com/ornicar/vindinium-starter-clojure/blob/master/src/vindinium/core.clj
-
-; Have fun !
+  (:require
+    [clojure.core.async :as async :refer [chan go-loop <! put!]]
+    [rmsbot.detectlang :as detectlang]
+    [rmsbot.twitter :as twitter]))
 
 (require 'clojure.edn)
+
+(defn pp [o] (let [_ (clojure.pprint/pprint o)] o))
 
 (def messages (clojure.edn/read-string (slurp "messages.edn")))
 
@@ -29,54 +24,63 @@
   ; this can come in a second priority feature
 )
 
-(defn detect-language
-  "Determine the language of a tweet"
-  [tweet-text]
-  (detectlang/identify tweet-text)
-)
-
-(defn find-answer
-  [topic]
-  (first (filter (fn [m] true) messages))
-  ; (first (filter (fn [m] (contains? (:keywords m) topic)) messages))
-  )
-
 (defn pick-answer
-  "Pick an answer for a given topic and language. For instance, 'linux' and 'fr' might be: 'Vous devez dire GNU/Linux.'"
+  "Pick an answer for a given topic and language. Ex: 'linux' 'fr'"
   [topic lang]
-;  (println "messages: " (some #(= "toto" %) (:keywords (find-answer "linux"))))
-  ; TODO Switch to Google Spreadsheet for easier edition?
-  (let [answer (first (filter (fn [m] (some #(= topic %) (:keywords m))) messages))]
-    (if answer
-      (rand-nth (get (:messages answer) (keyword lang) (:en (:messages answer))))
-      nil
-      )
+  (let [
+    topic-data (get messages (keyword topic))]
+    (rand-nth (get (:messages topic-data) (keyword lang) (:en (:messages topic-data))))
     )
 )
 
-(defn tweet
-  "Tweet an answer to a given tweet (referenced by id) – or just tweet something when tweet-parent-id is nil"
-  [tweet-text tweet-parent-id]
+;(defn tweet-topic
+;  "Find a matching topic for the input tweet message, nil if no match"
+;  [message]
+;  (first (filter (fn [m] (some #(.contains message %) (:keywords m))) messages))
+;)
 
-  (println "tweeting..." tweet-text)
-  ; TODO obviously use the twitter API
-  true
-)
+;(defn tweet-answer
+;  "Return the text to answer to a message, or nil if no match. Example: 'I love linux' => 'BTW it's GNU/Linux'"
+;  [message]
+;  (let [
+;    lang (detectlang/identify message)
+;    topic (tweet-topic message)]
+;    ((fnil #(pick-answer % lang) nil) topic))
+;)
 
 (defn -main
   "RMS bot main function."
   [& args]
+
+
+  (defn throttle-tweet [topic original-tweet]
+    (if (< (rand) 1) ; FIXME !!!
+      (let [
+            message (:text original-tweet)
+            tweet-id (:id original-tweet)
+            lang (detectlang/identify message)
+            answer (pick-answer topic lang)
+            to-tweet-text (str "@" (-> original-tweet :user :screen_name) " " answer) ]
+        (println "\n" (str "[" topic "*" lang "$" tweet-id "]") ":" message "\n ==>" to-tweet-text))))
+      ;(twitter/tweet to-tweet-text tweet-id))))
+
+  (twitter/stream-by-search
+    ["linux"]
+    ["gnu" "kernel"]
+    #(throttle-tweet "linux" %))
 
   ; TODO we need to iterate over tweets-channel
   ; See also http://clojuredocs.org/clojure.core.async/go-loop
 
   ; then for each tweet apply following:
 
-  (let [
-        [tweet-id tweet-text topic] ["42424242424242" "I love linux" "linux"] ; mock data
-        lang (detect-language tweet-text)
-        to-tweet-text (pick-answer topic lang)]
-    (tweet to-tweet-text tweet-id))
+; (let [
+;       [tweet-id tweet-text] ["42424242424242" "I love linux"] ; mock data
+;       to-tweet-text (tweet-answer tweet-text)]
+;   (if to-tweet-text
+;     (twitter/tweet to-tweet-text tweet-id)
+;     ())
+;   )
   ; should this by try catched in the main loop? :-D
 )
 
