@@ -1,4 +1,4 @@
-# rmsbot
+# twitbot
 
 Uses lein for build:
 
@@ -11,4 +11,7 @@ Uses lein for build:
 
 * `cp config-sample.edn config.edn`
 * replace 'xxx' by the credentials of your bot.
+
+* `cp messages-sample.edn messages.edn`
+* Configure the bot messages.
 

@@ -1,4 +1,4 @@
-(ns rmsbot.config)
+(ns twitbot.config)
 
 (require 'clojure.edn)
 

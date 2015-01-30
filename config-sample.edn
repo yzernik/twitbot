@@ -1,7 +1,9 @@
 {
+  :refresh-rate 60000
+  :twitter-screen-name "xxx"
   :twitter-key "xxx",
   :twitter-secret "xxx",
   :twitter-accesstoken "xxx",
   :twitter-accesstoken-secret "xxx",
   :detectlang-key "xxx"
-  }
+}

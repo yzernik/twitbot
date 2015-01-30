@@ -1,6 +1,7 @@
 # Project specific
 
 config.edn
+messages.edn
 
 # Lein&Closure
 

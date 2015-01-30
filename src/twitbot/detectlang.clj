@@ -1,5 +1,5 @@
-(ns rmsbot.detectlang
-  (:use rmsbot.config)
+(ns twitbot.detectlang
+  (:use twitbot.config)
   (:require [clj-http.client :as http]))
 
 (require 'clojure.edn)
