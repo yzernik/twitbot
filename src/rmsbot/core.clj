@@ -60,13 +60,13 @@
 
   ; then for each tweet apply following:
 
-  (let [
-        [tweet-id tweet-text] ["42424242424242" "I love linux"] ; mock data
-        to-tweet-text (tweet-answer tweet-text)]
-    (if to-tweet-text
-      (twitter/tweet to-tweet-text tweet-id)
-      ())
-    )
+; (let [
+;       [tweet-id tweet-text] ["42424242424242" "I love linux"] ; mock data
+;       to-tweet-text (tweet-answer tweet-text)]
+;   (if to-tweet-text
+;     (twitter/tweet to-tweet-text tweet-id)
+;     ())
+;   )
   ; should this by try catched in the main loop? :-D
 )
 
