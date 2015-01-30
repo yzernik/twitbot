@@ -31,7 +31,7 @@
     }))
 
 
-(def follow [screen-name]
+(defn follow [screen-name]
   (friendships-create :oauth-creds my-creds :params { :screen_name screen-name }))
 
 (defn create-stream [term]
