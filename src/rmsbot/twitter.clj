@@ -51,7 +51,10 @@
   (let [
     from-time (now (- interval))
     tweets (search-new-tweets keywords exclude from-time)]
+    (pp (str "nb tweets from search: " (count tweets)))
   (doseq [t tweets] (callback t))
+
+
   (Thread/sleep interval)
   (recur interval keywords exclude callback)))
 

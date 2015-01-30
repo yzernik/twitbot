@@ -1,19 +1,13 @@
 (ns rmsbot.core
   (:gen-class)
   (:require
+    [clojure.core.async :as async :refer [chan go-loop <! put!]]
     [rmsbot.detectlang :as detectlang]
     [rmsbot.twitter :as twitter]))
 
-; Hi guys :-)
-
-; Let's try some Clojure today =)
-
-; The clojure documentation can be found on: http://clojure.org/
-; or if you miss inspiration for HTTP usage: https://github.com/ornicar/vindinium-starter-clojure/blob/master/src/vindinium/core.clj
-
-; Have fun !
-
 (require 'clojure.edn)
+
+(defn pp [o] (let [_ (clojure.pprint/pprint o)] o))
 
 (def messages (clojure.edn/read-string (slurp "messages.edn")))
 
@@ -57,6 +51,23 @@
 (defn -main
   "RMS bot main function."
   [& args]
+
+
+  (defn throttle-tweet [topic original-tweet]
+    (if (< (rand) 1) ; FIXME !!!
+      (let [
+            message (:text original-tweet)
+            tweet-id (:id original-tweet)
+            lang (detectlang/identify message)
+            answer (pick-answer topic lang)
+            to-tweet-text (str "@" (-> original-tweet :user :screen_name) " " answer) ]
+        (println "\n" (str "[" topic "*" lang "$" tweet-id "]") ":" lang message "\n ==>" to-tweet-text))))
+      ;(twitter/tweet to-tweet-text tweet-id))))
+
+  (twitter/stream-by-search
+    ["linux"]
+    ["gnu" "kernel"]
+    #(throttle-tweet "linux" %))
 
   ; TODO we need to iterate over tweets-channel
   ; See also http://clojuredocs.org/clojure.core.async/go-loop
