@@ -6,6 +6,7 @@
       :en ["BTW, it's called GNU/Linux" "Linux is only the kernel..."]
       :fr ["Il faut dire GNU/Linux" "Ca s'appelle GNU/Linux"]
       :ja ["GNU/Linuxだよ！" "正しくは「GNU/Linux」だよ"]
+      :de ["Sie müssen GNU/Linux sagen!"]
     }
   },
   {
@@ -15,6 +16,16 @@
       :en [
         "Free Software is better. http://www.fsf.org/"
         "Open Source misses the point! https://www.gnu.org/philosophy/open-source-misses-the-point.html"
+      ],
+      :fr [
+        "C'est mieux de dire Logiciel Libre http://www.fsf.org/"
+        "Open Source est à côté de la plaque https://www.gnu.org/philosophy/open-source-misses-the-point.fr.html"
+      ],
+      :de [
+        "Open Source verfehlt das Ziel https://www.gnu.org/philosophy/open-source-misses-the-point.de.html"
+      ],
+      :ja [
+        "オープンソースは自由ソフトウェアの的を外すよ https://www.gnu.org/philosophy/open-source-misses-the-point.ja.html"
       ]
     }
   }
