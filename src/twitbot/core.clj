@@ -52,7 +52,6 @@
         (twitter/tweet to-tweet-text tweet-id))))
 
 (defn retweet [original-tweet]
-  (println "RT !!!")
   (let [
         message (:text original-tweet)
         tweet-id (:id original-tweet) ]
@@ -61,7 +60,6 @@
       (twitter/retweet tweet-id))))
 
 (defn star [original-tweet]
-  (println "STAR !!!")
   (let [
         message (:text original-tweet)
         tweet-id (:id original-tweet) ]
@@ -72,12 +70,13 @@
 ;;;;
 
 (defn route-action [topic]
-  (let [id (:topic topic)]
-    (case (:action topic)
+  (let [id (:topic topic)
+        action (:action topic)]
+    (case action
       "reply" #(tweet id %)
       "star" star
       "retweet" retweet
-      (fn [] nil))))
+      (do (println "Unable to find action for " action) (fn [] nil)))))
 
 ;;;;; topic stream
 
