@@ -29,7 +29,7 @@
     (catch Exception _ nil)))
 
 (defn parse-multiple-cell [cell]
-  (filter #(not (str/blank? %)) (str/split cell #"[|]")))
+  (map #(str/trim %) (filter #(not (str/blank? %)) (str/split cell #"[,]"))))
 
 (defn parse-index-sheet [json]
   (->> json

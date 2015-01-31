@@ -9,6 +9,7 @@
     [twitter.api.streaming]
     [twitter.api.restful])
   (:require
+    [clojure.core.async :as async :refer [>! <! filter< alts! sliding-buffer tap mult chan thread timeout go go-loop alts!!]]
     [twitter-streaming-client.core :as client]
     [twitter.oauth :as oauth]
     [clojure.data.json :as json]
@@ -47,47 +48,21 @@
 (defn start-stream [stream]
   (client/start-twitter-stream stream))
 
-(defn filter-tweets [tweets keywords exclude]
-  (filter (fn [t] (and
-             (not (= (-> t :user :screen_name) (:twitter-screen-name config)))
-             (every? #(not (.contains (.toLowerCase (:text t)) (.toLowerCase %))) exclude))) tweets))
-
-(defn score-tweet [t]
-  (- (-> t :user :followers_count) (/ (-> t :user :friends_count) 3)))
-
-(defn pick-interesting-tweet [tweets]
-  (get
-    (vec (reverse (sort-by score-tweet tweets))) ; sort by best tweets
-    (int (* (rand) (rand) (count tweets))) ; distribution that will favorize the best tweets
-    ))
-
-; TODO only use one stream for all: track all keywords of all topics at once and do more logic on our side.
-
-(defn stream [topic callback]
-  (let [
-        topicid (:topic topic)
-        keywords (:keywords topic)
-        exclude (get topic :exclude [])
-        refresh-rate (get topic :rate (get config :refresh-rate 60000))
-        delay-ms (int (rand refresh-rate))
+(defn stream [keywords]
+  (let [c (chan)
         stream (create-stream (clojure.string/join "," keywords))
         _ (start-stream stream)
-        my-pool (mk-pool) ]
+        my-pool (mk-pool)]
 
-    (after
-      delay-ms
+    (every
+      1000
       (fn[]
-      (every
-        refresh-rate
-        (fn[]
-          (let [q (client/retrieve-queues stream)
-                all (:tweet q)
-                tweets (filter-tweets all keywords exclude)
-                _ (println (str "[" topicid "] from " (count all) " tweets " (count tweets) " matching (rate: " refresh-rate " ms)\n"))
-                t (pick-interesting-tweet tweets)]
-            (if t (callback t))))
-        my-pool))
-      my-pool)))
+        (let [q (client/retrieve-queues stream)
+              tweets (:tweet q)]
+          (if tweets (doseq [t tweets] (go (>! c t))))))
+      my-pool)
+
+    c))
 
 
 ; (defn parse-date

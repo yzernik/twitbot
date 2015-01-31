@@ -1,7 +1,10 @@
 (ns twitbot.core
   (:gen-class)
-  (:use [twitbot.config])
+  (:use
+    [twitbot.stream]
+    [twitbot.config])
   (:require
+    [clojure.core.async :as async :refer [>! <! filter< alts! sliding-buffer tap mult chan thread timeout go go-loop alts!!]]
     [twitbot.spreadsheet :as spreadsheet]
     [twitbot.detectlang :as detectlang]
     [twitbot.twitter :as twitter]))
@@ -10,7 +13,11 @@
 
 (defn pp [o] (let [_ (clojure.pprint/pprint o)] o))
 
-(pp "Loading messages...")
+;; CONFIG
+
+(println "Loading messages...")
+
+(def mock-twitter-action (get config :mock-twitter-action false))
 
 (def messages
   (if-not (nil? (:messages-gdocs config))
@@ -19,7 +26,7 @@
 
 (pp messages)
 
-(def mock-twitter-action (get config :mock-twitter-action false))
+;;;;;
 
 (defn pick-answer
   "Pick an answer for a given topic and language. Ex: 'linux' 'fr'"
@@ -28,15 +35,17 @@
     topic-data (get messages (keyword topic))]
     (rand-nth (get (:messages topic-data) (keyword lang) (:en (:messages topic-data))))))
 
-(defn tweet [topic original-tweet]
+;;; ACTIONS
+
+(defn tweet [topicid original-tweet]
     (let [
           message (:text original-tweet)
           tweet-id (:id original-tweet)
           lang (detectlang/identify message)
-          answer (pick-answer topic lang)
+          answer (pick-answer topicid lang)
           screen-name (-> original-tweet :user :screen_name)
           to-tweet-text (str "@" screen-name " " answer) ]
-      (println "\n" (str "[" topic " " lang " " tweet-id "]") ":" message "\n ==>" to-tweet-text)
+      (println "\n" (str "[" topicid " " lang " " tweet-id "]") ":" message "\n ==>" to-tweet-text)
       (if (get config :follow-on-tweet false)
         (twitter/follow screen-name))
       (if-not mock-twitter-action
@@ -58,20 +67,80 @@
     (if-not mock-twitter-action
       (twitter/star tweet-id))))
 
+;;;;
+
+(defn route-action [topic]
+  (let [id (:topic topic)]
+    (case (:action topic)
+      "reply" #(tweet id %)
+      "star" star
+      "retweet" retweet
+      (fn [] nil))))
+
+;;;;; topic stream
+
+(defn score-tweet [tweet]
+  (- (-> tweet :user :followers_count) (/ (-> tweet :user :friends_count) 3)))
+
+(defn pick-interesting-tweet [tweets]
+  (get
+    (vec (reverse (sort-by score-tweet tweets))) ; sort by best tweets
+    (int (* (rand) (rand) (count tweets))) ; distribution that will favorize the best tweets
+    ))
+
+(defn tweet-matches-topic [tweet topic]
+  (let
+    [keywords (:keywords topic)
+     exclude (:exclude topic)]
+    (if-let
+      [ text (.toLowerCase (:text tweet)) ]
+      (and
+        (not (= (-> tweet :user :screen_name) (:twitter-screen-name config)))
+        (some #(.contains text (.toLowerCase %)) keywords)
+        (every? #(not (.contains text (.toLowerCase %))) exclude)))))
+
+(defn topic-channel [topic tweets-mult]
+  (let [c (chan)
+        filtered (filtered-channel tweets-mult #(tweet-matches-topic % topic) (sliding-buffer 100))
+        rate (:rate topic)
+        buffered (time-bufferize filtered rate) ]
+    (go-loop
+      []
+      (let [tweets (<! buffered)
+            tweet (pick-interesting-tweet tweets)]
+        (if tweet (>! c tweet)))
+      (recur))
+    c))
+
+
+
 (defn -main
   "bot main function."
   [& args]
 
-  (doseq [topicname (keys messages)]
-    (let [topic (get messages topicname)]
-      (twitter/stream
-        topic
-        (case (:action topic)
-          "reply" #(tweet topicname %)
-          "star" star
-          "retweet" retweet
-          identity
-        )))))
+  (let
+    [keywords  (->> messages
+                    vals
+                    (map :keywords)
+                    flatten
+                    (map #(.toLowerCase %))
+                    set)
+
+     _ (println "Creating stream for keywords:" (clojure.string/join ", " keywords))
+
+     tweets-chan (twitter/stream keywords)
+     tweets-broadcast (mult tweets-chan)]
+
+    (doseq [topicname (keys messages)]
+
+      (let [topic (get messages topicname)
+            tweet-action (route-action topic)
+            chan (topic-channel topic tweets-broadcast)]
+
+        (go-loop
+          []
+          (tweet-action (<! chan))
+          (recur))))))
 
 
 ;
