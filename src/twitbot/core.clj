@@ -33,11 +33,11 @@
   [topic lang]
   (let [
     topic-data (get messages (keyword topic))]
-    (rand-nth (get (:messages topic-data) (keyword lang) (:en (:messages topic-data))))))
+    (rand-nth (get (:messages topic-data) (keyword lang)))))
 
 ;;; ACTIONS
 
-(defn tweet [topicid original-tweet]
+(defn reply [topicid original-tweet]
     (let [
           message (:text original-tweet)
           tweet-id (:id original-tweet)
@@ -45,11 +45,13 @@
           answer (pick-answer topicid lang)
           screen-name (-> original-tweet :user :screen_name)
           to-tweet-text (str "@" screen-name " " answer) ]
-      (println "\n" (str "[" topicid " " lang " " tweet-id "]") ":" message "\n ==>" to-tweet-text)
-      (if (get config :follow-on-tweet false)
-        (twitter/follow screen-name))
-      (if-not mock-twitter-action
-        (twitter/tweet to-tweet-text tweet-id))))
+      (if answer
+        (do
+          (println "\n" (str "[" topicid " " lang " " tweet-id "]") ":" message "\n ==>" to-tweet-text)
+          (if (get config :follow-on-tweet false)
+            (twitter/follow screen-name))
+          (if-not mock-twitter-action
+            (twitter/tweet to-tweet-text tweet-id))))))
 
 (defn retweet [original-tweet]
   (let [
@@ -73,7 +75,7 @@
   (let [id (:topic topic)
         action (:action topic)]
     (case action
-      "reply" #(tweet id %)
+      "reply" #(reply id %)
       "star" star
       "retweet" retweet
       (do (println "Unable to find action for " action) (fn [] nil)))))

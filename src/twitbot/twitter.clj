@@ -26,12 +26,10 @@
                 (:twitter-accesstoken-secret config)))
 
 (defn tweet
-  [message parent-id]
-  (statuses-update :oauth-creds my-creds
-    :params {
-      :status message,
-      :in_reply_to_status_id parent-id
-    }))
+  ([message]
+   (statuses-update :oauth-creds my-creds :params {:status message }))
+  ([message parent-id]
+   (statuses-update :oauth-creds my-creds :params {:status message, :in_reply_to_status_id parent-id })))
 
 (defn follow [screen-name]
   (friendships-create :oauth-creds my-creds :params { :screen_name screen-name }))
