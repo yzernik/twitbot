@@ -61,6 +61,8 @@
     (int (* (rand) (rand) (count tweets))) ; distribution that will favorize the best tweets
     ))
 
+; TODO only use one stream for all: track all keywords of all topics at once and do more logic on our side.
+
 (defn stream [topic callback]
   (let [
         topicid (:topic topic)
@@ -68,7 +70,7 @@
         exclude (get topic :exclude [])
         refresh-rate (get topic :rate (get config :refresh-rate 60000))
         delay-ms (int (rand refresh-rate))
-        stream (create-stream (first keywords)); TODO (clojure.string/join " OR " keywords))
+        stream (create-stream (clojure.string/join "," keywords))
         _ (start-stream stream)
         my-pool (mk-pool) ]
 
@@ -79,8 +81,9 @@
         refresh-rate
         (fn[]
           (let [q (client/retrieve-queues stream)
-                tweets (filter-tweets (:tweet q) keywords exclude)
-                _ (println (str topicid ": " (count tweets) " matching tweets (rate: " refresh-rate " ms)\n"))
+                all (:tweet q)
+                tweets (filter-tweets all keywords exclude)
+                _ (println (str "[" topicid "] from " (count all) " tweets " (count tweets) " matching (rate: " refresh-rate " ms)\n"))
                 t (pick-interesting-tweet tweets)]
             (if t (callback t))))
         my-pool))
