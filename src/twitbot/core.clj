@@ -44,16 +44,14 @@
   "bot main function."
   [& args]
 
-  (doseq [topic (keys messages)]
-    (let [refresh-rate (:refresh-rate config)
-          t (get messages topic) ]
+  (doseq [topicname (keys messages)]
+    (let [topic (get messages topicname)]
       (twitter/stream
-        (:keywords t)
-        (:exclude t)
-        #(tweet topic %)
-        refresh-rate
-        (int (rand refresh-rate))
-        ))))
+        topic
+        (case (:action topic)
+          "reply" #(tweet topicname %)
+          identity
+        )))))
 
 
 ;

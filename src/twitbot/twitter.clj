@@ -55,19 +55,29 @@
     (int (* (rand) (rand) (count tweets))) ; distribution that will favorize the best tweets
     ))
 
-(defn stream [keywords exclude callback refresh-rate delay-ms]
-  (let [stream (create-stream (first keywords)); TODO (clojure.string/join " OR " keywords))
+(defn stream [topic callback]
+  (let [
+        keywords (:keywords topic)
+        exclude (get topic :exclude [])
+        refresh-rate (get topic :rate (get config :refresh-rate 60000))
+        delay-ms (int (rand refresh-rate))
+        stream (create-stream (first keywords)); TODO (clojure.string/join " OR " keywords))
         _ (start-stream stream)
         my-pool (mk-pool) ]
 
-    (after delay-ms
-      (fn[] (every refresh-rate (fn[]
-                         (let [q (client/retrieve-queues stream)
-                               tweets (filter-tweets (:tweet q) keywords exclude)
-                               _ (println keywords (str (count tweets) " tweets the last " refresh-rate " ms.\n"))]
-                       (let [t (pick-interesting-tweet tweets)]
-                         (if t (callback t))
-                         ))) my-pool)) my-pool)))
+    (after
+      delay-ms
+      (fn[]
+      (every
+        refresh-rate
+        (fn[]
+          (let [q (client/retrieve-queues stream)
+                tweets (filter-tweets (:tweet q) keywords exclude)
+                _ (println keywords (str (count tweets) " matching tweets (rate: " refresh-rate " ms)\n"))
+                t (pick-interesting-tweet tweets)]
+            (if t (callback t))))
+        my-pool))
+      my-pool)))
 
 
 ; (defn parse-date

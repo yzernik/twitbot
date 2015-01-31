@@ -31,6 +31,8 @@
        :entry
        (map (fn [entry]
               {:topic (-> entry :gsx$topic :$t)
+               :action (-> entry :gsx$action :$t)
+               :rate (let [cell (-> entry :gsx$rate :$t)] (if cell (try (. Integer parseInt cell) (catch Exception e nil))))
                :keywords (parse-multiple-cell (-> entry :gsx$keywords :$t))
                :exclude (parse-multiple-cell  (-> entry :gsx$exclude :$t))}))))
 
