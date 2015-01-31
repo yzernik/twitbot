@@ -19,6 +19,8 @@
 
 (pp messages)
 
+(def mock-twitter-action (get config :mock-twitter-action false))
+
 (defn pick-answer
   "Pick an answer for a given topic and language. Ex: 'linux' 'fr'"
   [topic lang]
@@ -37,8 +39,24 @@
       (println "\n" (str "[" topic " " lang " " tweet-id "]") ":" message "\n ==>" to-tweet-text)
       (if (get config :follow-on-tweet false)
         (twitter/follow screen-name))
-      (if-not (get config :disable-tweet false)
+      (if-not mock-twitter-action
         (twitter/tweet to-tweet-text tweet-id))))
+
+(defn retweet [original-tweet]
+  (let [
+        message (:text original-tweet)
+        tweet-id (:id original-tweet) ]
+    (println "\n" (str "[" tweet-id "]") ":" message "\n --> [Retweet]")
+    (if-not mock-twitter-action
+      (twitter/retweet tweet-id))))
+
+(defn star [original-tweet]
+  (let [
+        message (:text original-tweet)
+        tweet-id (:id original-tweet) ]
+    (println "\n" (str "[" tweet-id "]") ":" message "\n --> *Starred*")
+    (if-not mock-twitter-action
+      (twitter/star tweet-id))))
 
 (defn -main
   "bot main function."
@@ -50,6 +68,8 @@
         topic
         (case (:action topic)
           "reply" #(tweet topicname %)
+          "star" star
+          "retweet" retweet
           identity
         )))))
 

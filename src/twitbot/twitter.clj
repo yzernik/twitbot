@@ -35,6 +35,12 @@
 (defn follow [screen-name]
   (friendships-create :oauth-creds my-creds :params { :screen_name screen-name }))
 
+(defn star [id]
+  (favorites-create :oauth-creds my-creds :params { :id id }))
+
+(defn retweet [id]
+  (statuses-retweets-id :oauth-creds my-creds :params { :id id }))
+
 (defn create-stream [term]
   (client/create-twitter-stream twitter.api.streaming/statuses-filter :oauth-creds my-creds :params {:track term}))
 
@@ -57,6 +63,7 @@
 
 (defn stream [topic callback]
   (let [
+        topicid (:topic topic)
         keywords (:keywords topic)
         exclude (get topic :exclude [])
         refresh-rate (get topic :rate (get config :refresh-rate 60000))
@@ -73,7 +80,7 @@
         (fn[]
           (let [q (client/retrieve-queues stream)
                 tweets (filter-tweets (:tweet q) keywords exclude)
-                _ (println keywords (str (count tweets) " matching tweets (rate: " refresh-rate " ms)\n"))
+                _ (println (str topicid ": " (count tweets) " matching tweets (rate: " refresh-rate " ms)\n"))
                 t (pick-interesting-tweet tweets)]
             (if t (callback t))))
         my-pool))

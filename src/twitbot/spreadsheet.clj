@@ -16,11 +16,17 @@
        (map #(let [[k v] %] [k (vec (map second v))]))
        (reduce conj {})))
 
+(defn group-by-first [group m]
+  (into {} (map #(let [[k v] %] [k (first v)])
+                (group-by group m))))
+
 (defn get-index-sheet [id]
   (:body (http/get (str "https://spreadsheets.google.com/feeds/list/" id "/od6/public/values?alt=json") {:as :json})))
 
 (defn get-sheet-cells [id sheet-index]
-  (:body (http/get (str "https://spreadsheets.google.com/feeds/list/" id "/" sheet-index "/public/values?alt=json") {:as :json})))
+  (try
+    (:body (http/get (str "https://spreadsheets.google.com/feeds/list/" id "/" sheet-index "/public/values?alt=json") {:as :json}))
+    (catch Exception _ nil)))
 
 (defn parse-multiple-cell [cell]
   (filter #(not (str/blank? %)) (str/split cell #"[|]")))
@@ -54,9 +60,10 @@
 
 (defn gdocs-load-messages [id]
   (let [ topics (parse-index-sheet (get-index-sheet id))
-        sheets (map #(parse-sheet-cells (get-sheet-cells id %)) (range 2 (+ 2 (count topics)))) ]
+        sheets (map #(if-let [sheet (get-sheet-cells id %)] (parse-sheet-cells sheet)) (range 2 (+ 2 (count topics)))) ]
 
+    (into {} (filter #(let [[k v] %] (and k v))
     (merge-with
-      (fn [a b] (merge (first a) (first b)))
-      (group-by #(keyword (:topic %)) topics)
-      (group-by #(keyword (:topic %)) sheets))))
+      merge
+      (group-by-first #(keyword (:topic %)) topics)
+      (group-by-first #(keyword (:topic %)) sheets))))))
