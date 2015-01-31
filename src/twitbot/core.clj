@@ -103,7 +103,7 @@
 (defn topic-channel [topic tweets-mult]
   (let [c (chan)
         id (:topic topic)
-        rate (:rate topic)
+        rate (* 1000 (get topic :rate 60))
         filtered (filtered-channel tweets-mult #(tweet-matches-topic % topic) (sliding-buffer 100))
         buffered (time-bufferize filtered rate) ]
     (go-loop
