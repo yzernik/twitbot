@@ -37,7 +37,8 @@
       (println "\n" (str "[" topic " " lang " " tweet-id "]") ":" message "\n ==>" to-tweet-text)
       (if (:follow-on-tweet config)
         (twitter/follow screen-name))
-      (twitter/tweet to-tweet-text tweet-id)))
+      (if-not (:disable-tweet config)
+        (twitter/tweet to-tweet-text tweet-id))))
 
 (defn -main
   "bot main function."

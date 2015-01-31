@@ -22,14 +22,17 @@
 (defn get-sheet-cells [id sheet-index]
   (:body (http/get (str "https://spreadsheets.google.com/feeds/list/" id "/" sheet-index "/public/values?alt=json") {:as :json})))
 
+(defn parse-multiple-cell [cell]
+  (filter #(not (str/blank? %)) (str/split cell #"[|]")))
+
 (defn parse-index-sheet [json]
   (->> json
        :feed
        :entry
        (map (fn [entry]
               {:topic (-> entry :gsx$topic :$t)
-               :keywords (str/split (-> entry :gsx$keywords :$t) #"[|]")
-               :exclude (str/split  (-> entry :gsx$exclude :$t)  #"[|]")}))))
+               :keywords (parse-multiple-cell (-> entry :gsx$keywords :$t))
+               :exclude (parse-multiple-cell  (-> entry :gsx$exclude :$t))}))))
 
 (defn parse-sheet-cells [json]
   {:topic (-> json :feed :title :$t)

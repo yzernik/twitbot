@@ -17,6 +17,8 @@
     (twitter.callbacks.protocols SyncSingleCallback)
     (twitter.callbacks.protocols AsyncStreamingCallback)))
 
+(defn pp [o] (let [_ (clojure.pprint/pprint o)] o))
+
 (def my-creds (make-oauth-creds (:twitter-key config)
                 (:twitter-secret config)
                 (:twitter-accesstoken config)
@@ -30,7 +32,6 @@
       :in_reply_to_status_id parent-id
     }))
 
-
 (defn follow [screen-name]
   (friendships-create :oauth-creds my-creds :params { :screen_name screen-name }))
 
@@ -40,6 +41,20 @@
 (defn start-stream [stream]
   (client/start-twitter-stream stream))
 
+(defn filter-tweets [tweets keywords exclude]
+  (filter (fn [t] (and
+             (not (= (-> t :user :screen_name) (:twitter-screen-name config)))
+             (every? #(not (.contains (.toLowerCase (:text t)) (.toLowerCase %))) exclude))) tweets))
+
+(defn score-tweet [t]
+  (- (-> t :user :followers_count) (/ (-> t :user :friends_count) 3)))
+
+(defn pick-interesting-tweet [tweets]
+  (get
+    (vec (reverse (sort-by score-tweet tweets))) ; sort by best tweets
+    (int (* (rand) (rand) (count tweets))) ; distribution that will favorize the best tweets
+    ))
+
 (defn stream [keywords exclude callback refresh-rate delay-ms]
   (let [stream (create-stream (first keywords)); TODO (clojure.string/join " OR " keywords))
         _ (start-stream stream)
@@ -48,13 +63,10 @@
     (after delay-ms
       (fn[] (every refresh-rate (fn[]
                          (let [q (client/retrieve-queues stream)
-                               tweets (:tweet q)
+                               tweets (filter-tweets (:tweet q) keywords exclude)
                                _ (println keywords (str (count tweets) " tweets the last " refresh-rate " ms.\n"))]
-                       (let [t (first tweets)]
-                         (if (and
-                               (not (= (-> t :user :screen_name) (:twitter-screen-name config)))
-                               (every? #(not (.contains (.toLowerCase (:text t)) (.toLowerCase %))) exclude))
-                           (callback t))
+                       (let [t (pick-interesting-tweet tweets)]
+                         (if t (callback t))
                          ))) my-pool)) my-pool)))
 
 
