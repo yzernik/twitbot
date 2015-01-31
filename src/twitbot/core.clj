@@ -52,6 +52,7 @@
         (twitter/tweet to-tweet-text tweet-id))))
 
 (defn retweet [original-tweet]
+  (println "RT !!!")
   (let [
         message (:text original-tweet)
         tweet-id (:id original-tweet) ]
@@ -60,6 +61,7 @@
       (twitter/retweet tweet-id))))
 
 (defn star [original-tweet]
+  (println "STAR !!!")
   (let [
         message (:text original-tweet)
         tweet-id (:id original-tweet) ]
@@ -101,13 +103,15 @@
 
 (defn topic-channel [topic tweets-mult]
   (let [c (chan)
-        filtered (filtered-channel tweets-mult #(tweet-matches-topic % topic) (sliding-buffer 100))
+        id (:topic topic)
         rate (:rate topic)
+        filtered (filtered-channel tweets-mult #(tweet-matches-topic % topic) (sliding-buffer 100))
         buffered (time-bufferize filtered rate) ]
     (go-loop
       []
       (let [tweets (<! buffered)
-            tweet (pick-interesting-tweet tweets)]
+            tweet (pick-interesting-tweet tweets)
+            _ (println id "received" (count tweets) "tweets." (if-not tweet " No tweet handled." ""))]
         (if tweet (>! c tweet)))
       (recur))
     c))
@@ -134,6 +138,7 @@
     (doseq [topicname (keys messages)]
 
       (let [topic (get messages topicname)
+            _ (println "Handling topic:" topicname)
             tweet-action (route-action topic)
             chan (topic-channel topic tweets-broadcast)]
 

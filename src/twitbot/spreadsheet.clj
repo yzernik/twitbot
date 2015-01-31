@@ -28,22 +28,25 @@
     (:body (http/get (str "https://spreadsheets.google.com/feeds/list/" id "/" sheet-index "/public/values?alt=json") {:as :json}))
     (catch Exception _ nil)))
 
+(defn cell-value [cell]
+  (str/trim (or (:$t cell) "")))
+
 (defn parse-multiple-cell [cell]
-  (map #(str/trim %) (filter #(not (str/blank? %)) (str/split cell #"[,]"))))
+  (map #(str/trim %) (filter #(not (str/blank? %)) (str/split (cell-value cell) #"[,]"))))
 
 (defn parse-index-sheet [json]
   (->> json
        :feed
        :entry
        (map (fn [entry]
-              {:topic (-> entry :gsx$topic :$t)
-               :action (-> entry :gsx$action :$t)
-               :rate (let [cell (-> entry :gsx$rate :$t)] (if cell (try (. Integer parseInt cell) (catch Exception e nil))))
-               :keywords (parse-multiple-cell (-> entry :gsx$keywords :$t))
-               :exclude (parse-multiple-cell  (-> entry :gsx$exclude :$t))}))))
+              {:topic (-> entry :gsx$topic cell-value)
+               :action (-> entry :gsx$action cell-value)
+               :rate (let [cell (-> entry :gsx$rate cell-value)] (if cell (try (. Integer parseInt cell) (catch Exception e nil))))
+               :keywords (parse-multiple-cell (-> entry :gsx$keywords))
+               :exclude (parse-multiple-cell  (-> entry :gsx$exclude))}))))
 
 (defn parse-sheet-cells [json]
-  {:topic (-> json :feed :title :$t)
+  {:topic (-> json :feed :title cell-value)
    :messages
    (tuples-to-key-value-vector (apply concat (->> json
          :feed
@@ -52,7 +55,7 @@
              (filter
                #(not (nil? %))
                (map #(let [[k v] %
-                           content (:$t v)]
+                           content (cell-value v)]
                        (if (and (not (str/blank? content)) (.startsWith (name k) "gsx$"))
                          [ (keyword (.substring (name k) 4)) content ])) entry)))))))
 
